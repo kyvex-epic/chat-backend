@@ -124,13 +124,16 @@ class Logger {
 
 const systemLogger = new Logger('logger', false)
 const logger = new Logger('main')
+let terminated = false;
 
 function processDeaded(reason) {
+    if (terminated) return; terminated = true;
     systemLogger.separator()
     systemLogger.log(`ERROR`, `Process terminated, reason: ${reason}`)
     loggers.forEach(logger => {
         logger.log(`INFO`, `Find this log at ${logger.logFilePath}`)
     })
+    process.exit(0)
 }
 
 // When the process is terminated, log to console
