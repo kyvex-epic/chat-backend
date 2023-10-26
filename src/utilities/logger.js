@@ -2,13 +2,18 @@ const fs = require('fs');
 const path = require('path');
 const chalk = require('chalk');
 
+const colours = {
+    PRIMARY: "#007bff", INFO: "#17a2b8", SUCCESS: "#28a745", WARNING: "#ffc107", ERROR: "#dc3545",
+    LIGHT: "#f8f9fa", DARK: "#343a40", WHITE: "#ffffff", BLACK: "#000000"
+}
+
 const typeColours = {
-    WARNING: chalk.rgb(20, 20, 20).bgYellow.bold,
-    ERROR: chalk.rgb(235, 235, 235).bgRed.bold,
-    SUCCESS: chalk.rgb(20, 20, 20).bgGreen.bold,
-    INFO: chalk.rgb(20, 20, 20).bgBlue.bold,
-    DATE: chalk.rgb(0, 0, 0).bgRgb(200, 200, 200).bold,
-    LOGGER: chalk.rgb(20, 20, 20).bgRgb(200, 200, 200).bold,
+    WARNING: chalk.hex(colours.WHITE).bgHex(colours.WARNING).bold,
+    ERROR: chalk.hex(colours.WHITE).bgHex(colours.ERROR).bold,
+    SUCCESS: chalk.rgb(20, 20, 20).bgHex(colours.SUCCESS).bold,
+    INFO: chalk.hex(colours.BLACK).bgHex(colours.INFO).bold,
+    DATE: chalk.hex(colours.WHITE).bgHex(colours.DARK).bold,
+    LOGGER: chalk.hex(colours.WHITE).bgHex(colours.DARK).bold
 }
 
 const loggers = []
@@ -25,7 +30,7 @@ class Logger {
 
         loggers.push(this)
 
-        if (!silent) {
+        if (!this.silent) {
             this.log(`SUCCESS`, `New logger ${typeColours.LOGGER(this.name)} created`)
             this.log(`INFO`,    `Logging to ${this.logFilePath}`)
         }
@@ -75,8 +80,6 @@ class Logger {
         const timestamp = new Date().toLocaleTimeString('en-gb', { hour12: false });
         const formattedName = this.formatName(this.name);
 
-        //
-
         // formattedLog: [NAME] | [JUL 20] [15:30:00] [INFO] | Hello World
 
         // Log to console using Chalk for formatting
@@ -115,19 +118,12 @@ class Logger {
     info(text) {
         this.log(`INFO`, text)
     }
-
 }
 
 
 
 const systemLogger = new Logger('logger', false)
 const logger = new Logger('main')
-
-// wait 10s
-setTimeout(() => {
-    logger.log(`SUCCESS`, `Hello World`)
-    logger.log(`INFO`, `Hello World`)
-}, 10000)
 
 function processDeaded(reason) {
     systemLogger.separator()
