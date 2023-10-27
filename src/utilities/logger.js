@@ -40,7 +40,7 @@ class Logger {
         const now = new Date();
         const date = now.toISOString().slice(0, 10);
         const time = now.toTimeString().slice(0, 8).replace(/:/g, '-');
-        return `${date}-${time}${name ? '-' + name : ''}.log`;
+        return `${date}_${time}${name ? '_' + name : ''}.log`;
     }
 
     getMaxLogTypeLength() {
