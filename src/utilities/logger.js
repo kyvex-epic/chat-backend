@@ -21,7 +21,7 @@ const loggers = []
 class Logger {
     constructor(name = '', silent = false) {
         this.logFileName = this.getFormattedFileName(name);
-        this.logFilePath = path.join('logs', this.logFileName);
+        this.logFilePath = path.join(__dirname, '../../logs', this.logFileName);
         this.logTypes = ["WARNING", "ERROR", "SUCCESS", "INFO"];
         this.maxLogTypeLength = this.getMaxLogTypeLength();
         this.name = name;
@@ -32,7 +32,7 @@ class Logger {
 
         if (!this.silent) {
             this.log(`SUCCESS`, `New logger ${typeColours.LOGGER(this.name)} created`)
-            this.log(`INFO`,    `Logging to ${this.logFilePath}`)
+            this.log(`INFO`,    `Logging to ${this.logFilePath.split('/').slice(-2).join('/')}`)
         }
     }
 
@@ -62,7 +62,7 @@ class Logger {
     }
 
     ensureLogDirectory() {
-        const logDir = path.join(__dirname, 'logs');
+        const logDir = path.join(__dirname, '../../logs');
         if (!fs.existsSync(logDir)) {
             fs.mkdirSync(logDir);
         }
@@ -79,8 +79,6 @@ class Logger {
         const date = new Date().toLocaleString('en-gb', { month: 'short', day: 'numeric' }).toUpperCase();
         const timestamp = new Date().toLocaleTimeString('en-gb', { hour12: false });
         const formattedName = this.formatName(this.name);
-
-        // formattedLog: [NAME] | [JUL 20] [15:30:00] [INFO] | Hello World
 
         // Log to console using Chalk for formatting
         console.log(

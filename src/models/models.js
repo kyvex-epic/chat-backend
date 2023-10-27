@@ -5,6 +5,7 @@
  */
 
 const userModel = require('./userModel');
+const guildModel = require('./guildModel');
 
-const models = { userModel };
+const models = { userModel, guildModel };
 module.exports = models;

@@ -3,7 +3,10 @@
  * @description User model
  */
 
+require('dotenv').config();
+const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
+const { Schema } = mongoose;
 
 const userSchema = new mongoose.Schema({
 
@@ -11,13 +14,14 @@ const userSchema = new mongoose.Schema({
     username: {type: String, required: true, unique: true, index: true},
     display_name: {type: String, required: true},
     password: {type: String, required: true},
+    token: {type: String, default: null},
 
     // Things
     // TODO: Uncomment these when the models are created
-    // messages: [{type: Schema.Types.ObjectId, ref: 'Message'}],
-    // guilds: [{type: Schema.Types.ObjectId, ref: 'Guild'}],
-    // friends: [{type: Schema.Types.ObjectId, ref: 'User'}],
-    // friend_requests: [{type: Schema.Types.ObjectId, ref: 'User'}],
+    messages: [{type: Schema.Types.ObjectId, ref: 'Message'}],
+    guilds: [{type: Schema.Types.ObjectId, ref: 'Guild'}],
+    friends: [{type: Schema.Types.ObjectId, ref: 'User'}],
+    friend_requests: [{type: Schema.Types.ObjectId, ref: 'User'}],
 
     // Meta
     created_at: {type: Date, default: Date.now},
@@ -50,14 +54,26 @@ const userSchema = new mongoose.Schema({
     site_moderator: {type: Boolean, default: false},
 
     // Badges
-    badges: [{type: String, default: null, enum: ["verified", "partner", "developer", "contributor", "admin", "moderator"]}],
+    badges: [{type: String, default: null, enum: ["verified", "partner", "developer", "contributor", "admin", "moderator",
+    "early_supporter", "bug_hunter"]}],
 
 });
 
+// Give the user the Early Supporter badge if they are one of the first 100 users
+userSchema.pre('save', async function(next) {
+    const User = mongoose.model('User');
+    const userCount = await User.countDocuments();
+    if (userCount < 100) this.badges.push("early_supporter");
+
+    // If the password is being changed, hash it
+    if (this.isModified('password')) {
+        const salt = await bcrypt.genSalt(process.env.SALT_ROUNDS);
+        this.password = await bcrypt.hash(this.password, salt);
+    }
+    
+    next();
+});
+
+
 const User = mongoose.model('User', userSchema);
 module.exports = { User };
-
-
-
-
-

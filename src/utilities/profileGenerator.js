@@ -3,9 +3,11 @@
  * @description Generate a profile picture for a user using DiceBear Avatars
  * @module utilities/profileGenerator
  * @requires {@link https://www.dicebear.com/}
+ * @requires {@link https://www.npmjs.com/package/axios}
  */
 
 require('dotenv').config();
+const axios = require('axios');
 const apiUrl = `${process.env.DICEBEAR_API_URL}:${process.env.DICEBEAR_API_PORT}`;
 
 /**
@@ -13,7 +15,7 @@ const apiUrl = `${process.env.DICEBEAR_API_URL}:${process.env.DICEBEAR_API_PORT}
  * @desc Generates a profile image for a user using DiceBear Avatars
  * @param {String} seed For example, a username or guild name
  * @param {String} style See https://www.dicebear.com/styles/
- * @return {Blob} A Blob object representing the image
+ * @return {Buffer} The generated image
  */
 
 async function generateProfileImg(seed, style="bottts-neutral") {
@@ -23,8 +25,9 @@ async function generateProfileImg(seed, style="bottts-neutral") {
                     + `&radius=10&backgroundType=gradientLinear`
                     + `&backgroundRotation=0,360,-360,-330,-300,-270,-240,-210,-180,-150,-120,-90,-60,-30,30,60,90,120,150,180,210,240,270,300,330`
 
-    const res = await fetch(reqUrl);
-    return await res.blob();
+    const response = await axios.get(reqUrl, { responseType: 'arraybuffer' })
+    return response.data
+
 }
 
 
