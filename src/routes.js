@@ -14,7 +14,9 @@ const routeLogger = new Logger('routes');
 const routes = [
     require('./routes/userRoutes'),
     require('./routes/guildRoutes'),
-    require('./routes/channelRoutes')
+    require('./routes/channelRoutes'),
+    require('./routes/messageRoutes'),
+    require('./routes/miscRoutes'),
 ]
 
 routeLogger.info(chalk.green('Loading routes...'));
