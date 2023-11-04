@@ -6,6 +6,7 @@
 
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 const {User} = require('../models/userModel');
 const {logger} = require('../utilities/logger');
 const {generateProfileImg} = require('../utilities/profileGenerator');
