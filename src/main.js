@@ -7,9 +7,11 @@
 
 
 require('dotenv').config();
+const http = require('http');
 const express = require('express');
+const { Server } = require('socket.io');
+const cors = require('cors');
 const {Logger, logger} = require('./utilities/logger');
-const app = express();
 const chalk = require('chalk');
 
 const bodyParser = require('body-parser');
@@ -17,18 +19,44 @@ const { connect } = require('./utilities/database');
 
 const loggers = {
     requests: new Logger('requests'),
-
+    websocket: new Logger('websocket'),
 }
+
+const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+    cors: { origin: '*' }
+});
 
 logger.separator();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(cors());
 
 async function main() {
     const routes = require('./routes');
-    app.use('/', routes);
 
+    io.on('connection', (socket) => {
+        loggers.websocket.log(`SUCCESS`, `New websocket connection from ${socket.handshake.address}`)
+        socket.on("subscribe", (topics) => {
+
+            if (typeof topics === 'string') topics = [topics];
+
+            for (const topic of topics) {
+                socket.join(topic);
+                loggers.websocket.log(`SUCCESS`, `${socket.handshake.address} subscribed to ${topic}`)
+            }
+        });
+
+        socket.on("unsubscribe", (topic) => {
+            socket.leave(topic);
+        });
+
+
+    });
+
+    app.use('/', routes);
 
     try {
         await connect();
@@ -37,10 +65,15 @@ async function main() {
         return logger.log(`ERROR`, `${err.stack}`)
     }
 
-    app.listen(process.env.PORT, () => {
-        logger.log(`SUCCESS`, `Server started at port ${process.env.PORT}`)
+    server.listen(process.env.PORT, () => {
+        logger.log(`SUCCESS`, `Server started on port ${process.env.PORT}`)
+        logger.log(`SUCCESS`, `Websocket started on port ${process.env.PORT}`)
     });
+
 }
+
+
+
 
 // On request
 app.use((req, res, next) => {
@@ -75,4 +108,4 @@ process.on('uncaughtException', (error, promise) => {
 });
 
 
-
+module.exports = { io };
