@@ -7,6 +7,7 @@
 const {User} = require('../models/userModel');
 const {Guild} = require('../models/guildModel');
 const {Channel} = require('../models/channelModel');
+const {Message} = require('../models/messageModel');
 const {logger} = require('../utilities/logger');
 
 // POST /channel/:guildId/create
@@ -68,7 +69,9 @@ const getChannel = async (req, res) => {
         const channel = await Channel.findById(channelId);
         if (!channel) return res.status(404).json({error: 'Channel not found'});
 
-        channel.messages = ['Messages are not shown in this endpoint'];
+        // Limit the number of messages returned to 150
+        channel.messages = await Message.find({channel: channel._id}).sort({created_at: -1}).limit(150).populate('author');
+
         res.status(200).json({channel});
     } catch (error) {
         res.status(500).json({error: 'Error getting channel'});

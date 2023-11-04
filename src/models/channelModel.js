@@ -11,6 +11,9 @@ const channelSchema = new mongoose.Schema({
     parent: {type: mongoose.Schema.Types.ObjectId, ref: 'Channel', default: null},
     children: [{type: mongoose.Schema.Types.ObjectId, ref: 'Channel'}],
     type: {type: String, enum: ['text', 'forum', 'announcement', 'media', 'category'], default: 'text'},
+    position: {type: Number, default: 0},
+
+    channelHash: {type: String, default: null},
 
     // Meta
     created_at: {type: Date, default: Date.now},
@@ -26,6 +29,20 @@ const channelSchema = new mongoose.Schema({
     nsfw: {type: Boolean, default: false},
     auto_archive: {type: Number, default: 0} // Hours
 
+});
+
+// If position is not specified, set it to the last position
+channelSchema.pre('save', async function (next) {
+    if (this.isNew) {
+        const lastChannel = await Channel.findOne({guild: this.guild}).sort({position: -1});
+        if (lastChannel) this.position = lastChannel.position + 1;
+        console.log(this.guild)
+
+        const { io } = require('../main.js');
+        io.to(this.guild._id.toString()).emit('channelCreate', this);
+    }
+
+    next();
 });
 
 
